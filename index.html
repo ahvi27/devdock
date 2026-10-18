@@ -1,0 +1,689 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="DevDock: a browser-based developer toolbox.">
+  <title>DevDock — Developer Toolbox</title>
+
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #10111c;
+      --panel: #191b2c;
+      --input: #111321;
+      --text: #eeeefa;
+      --muted: #a4a7c2;
+      --accent: #b2a0ff;
+      --border: #ffffff14;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background:
+        radial-gradient(circle at 85% 0%, #7953c52b, transparent 35%),
+        var(--bg);
+      color: var(--text);
+      font-family: system-ui, sans-serif;
+    }
+
+    button, input, textarea { font: inherit; }
+
+    button {
+      cursor: pointer;
+      border: 1px solid transparent;
+      border-radius: 10px;
+      padding: 11px 17px;
+      background: var(--accent);
+      color: #171129;
+      font-weight: 700;
+    }
+
+    button:hover { filter: brightness(1.1); }
+
+    button:disabled {
+      opacity: .45;
+      cursor: default;
+    }
+
+    :focus-visible {
+      outline: 3px solid var(--accent);
+      outline-offset: 4px;
+    }
+
+    header, main, footer {
+      width: min(1100px, calc(100% - 40px));
+      margin: auto;
+    }
+
+    header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 20px;
+      padding: 28px 0;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .logo {
+      font-size: 23px;
+      font-weight: 850;
+      letter-spacing: -1px;
+    }
+
+    .logo span { color: var(--accent); }
+
+    .badge {
+      font-size: 12px;
+      color: var(--muted);
+      border: 1px solid var(--border);
+      border-radius: 30px;
+      padding: 8px 13px;
+    }
+
+    .hero { padding: 50px 0 30px; }
+
+    .eyebrow {
+      color: var(--accent);
+      font-size: 11px;
+      font-weight: 800;
+      letter-spacing: 3px;
+    }
+
+    h1 {
+      font-size: clamp(34px, 6vw, 58px);
+      letter-spacing: -2px;
+      line-height: 1.1;
+      margin: 18px 0;
+    }
+
+    .hero > p:last-child {
+      max-width: 570px;
+      color: var(--muted);
+      line-height: 1.7;
+    }
+
+    .tabs {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin: 10px 0 24px;
+    }
+
+    .tabs button {
+      background: transparent;
+      color: var(--muted);
+      border-color: var(--border);
+    }
+
+    .tabs button[aria-pressed="true"] {
+      color: var(--accent);
+      border-color: #b2a0ff55;
+      background: #b2a0ff14;
+    }
+
+    .workspace {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 270px;
+      gap: 22px;
+      align-items: start;
+    }
+
+    .panel, aside {
+      background: var(--panel);
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      padding: 26px;
+    }
+
+    [hidden] { display: none !important; }
+
+    h2 { margin: 0 0 10px; font-size: 23px; }
+    h3 { font-size: 15px; }
+
+    .description, .hint {
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.7;
+    }
+
+    label {
+      display: block;
+      margin: 22px 0 10px;
+      font-size: 13px;
+      font-weight: 650;
+    }
+
+    textarea, input[type="text"] {
+      width: 100%;
+      padding: 15px;
+      border: 1px solid #ffffff20;
+      border-radius: 12px;
+      background: var(--input);
+      color: var(--text);
+    }
+
+    textarea {
+      min-height: 270px;
+      resize: vertical;
+      font: 14px/1.7 ui-monospace, monospace;
+      tab-size: 2;
+    }
+
+    textarea::placeholder { color: #767a99; }
+
+    .actions {
+      display: flex;
+      flex-wrap: wrap;
+      align-items: center;
+      gap: 10px;
+      margin-top: 18px;
+    }
+
+    .secondary {
+      background: transparent;
+      border-color: #ffffff25;
+      color: var(--text);
+    }
+
+    .status {
+      min-height: 24px;
+      margin: 18px 0 0;
+      color: var(--accent);
+      font-size: 13px;
+      line-height: 1.6;
+      overflow-wrap: anywhere;
+    }
+
+    .terminal {
+      border: 1px solid var(--border);
+      background: var(--input);
+      border-radius: 12px;
+      overflow: hidden;
+      margin: 20px 0;
+    }
+
+    .terminal-bar {
+      padding: 10px 14px;
+      background: #ffffff05;
+      font-size: 11px;
+      color: var(--muted);
+    }
+
+    .terminal pre {
+      padding: 15px;
+      margin: 0;
+      font-size: 12px;
+      line-height: 1.9;
+      white-space: pre-wrap;
+    }
+
+    .terminal span { color: var(--accent); }
+
+    .side-item {
+      border-top: 1px solid var(--border);
+      padding-top: 14px;
+      margin-top: 18px;
+    }
+
+    .side-item strong { font-size: 13px; }
+
+    .side-item p {
+      color: var(--muted);
+      font-size: 12px;
+      line-height: 1.7;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      accent-color: var(--accent);
+      margin: 10px 0;
+    }
+
+    .options {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 10px;
+      margin: 20px 0;
+    }
+
+    .options label {
+      margin: 0;
+      padding: 12px;
+      background: var(--input);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      font-size: 12px;
+    }
+
+    input[type="checkbox"] {
+      accent-color: var(--accent);
+      margin-right: 7px;
+    }
+
+    #password-output {
+      font: 18px/1.6 ui-monospace, monospace;
+      letter-spacing: 1px;
+    }
+
+    .note-summary {
+      display: flex;
+      justify-content: space-between;
+      gap: 15px;
+      flex-wrap: wrap;
+      color: var(--muted);
+      font-size: 12px;
+      margin-top: 10px;
+    }
+
+    footer {
+      padding: 35px 0;
+      text-align: center;
+      font-size: 12px;
+      color: var(--muted);
+    }
+
+    @media (max-width: 800px) {
+      .workspace { grid-template-columns: 1fr; }
+      aside { display: none; }
+    }
+
+    @media (max-width: 480px) {
+      header { flex-wrap: wrap; }
+      .panel { padding: 20px; }
+      .options { grid-template-columns: 1fr; }
+      .tabs button { flex: 1; padding: 10px; }
+    }
+  </style>
+</head>
+
+<body>
+  <header>
+    <div class="logo"><span>&lt;/&gt;</span> DevDock</div>
+    <div class="badge">Browser tools · No account needed</div>
+  </header>
+
+  <main>
+    <section class="hero">
+      <p class="eyebrow">A LITTLE SPACE FOR BIG IDEAS</p>
+      <h1>Your everyday<br>developer sidekick.</h1>
+      <p>
+        Clean up JSON, generate a random password, and keep your coding
+        notes together. Three useful tools. One simple workspace.
+      </p>
+    </section>
+
+    <nav class="tabs" aria-label="Choose a tool">
+      <button data-tool="json" aria-pressed="true" aria-controls="json-panel">
+        { } JSON Studio
+      </button>
+      <button data-tool="password" aria-pressed="false"
+              aria-controls="password-panel">
+        ✦ Password Lab
+      </button>
+      <button data-tool="notes" aria-pressed="false" aria-controls="notes-panel">
+        ▤ Dev Notes
+      </button>
+    </nav>
+
+    <div class="workspace">
+      <div>
+        <section class="panel" id="json-panel" aria-labelledby="json-title">
+          <h2 id="json-title">Make your JSON readable.</h2>
+          <p class="description">
+            Format or compact JSON. Invalid input stays in the editor
+            so you can correct it.
+          </p>
+
+          <label for="json-input">JSON editor</label>
+          <textarea id="json-input" spellcheck="false"
+                    placeholder='{"project":"DevDock","ready":true}'></textarea>
+
+          <div class="actions">
+            <button id="format-json">Format</button>
+            <button id="minify-json" class="secondary">Minify</button>
+            <button id="sample-json" class="secondary">Load sample</button>
+            <button id="copy-json" class="secondary">Copy</button>
+          </div>
+
+          <p class="hint">
+            Uses JavaScript JSON parsing. Avoid using this editor for
+            integers larger than 9,007,199,254,740,991; they may lose precision.
+          </p>
+          <p id="json-status" class="status" role="status"></p>
+        </section>
+
+        <section class="panel" id="password-panel" hidden
+                 aria-labelledby="password-title">
+          <h2 id="password-title">A fresh password, on demand.</h2>
+          <p class="description">
+            Generated on your device using the browser’s cryptographic
+            random number generator. Passwords are not saved.
+          </p>
+
+          <label for="password-length">
+            Length: <span id="length-value">20</span> characters
+          </label>
+          <input id="password-length" type="range"
+                 min="8" max="64" value="20">
+
+          <div class="options">
+            <label>
+              <input id="uppercase" type="checkbox" checked>
+              Uppercase A–Z
+            </label>
+            <label>
+              <input id="lowercase" type="checkbox" checked>
+              Lowercase a–z
+            </label>
+            <label>
+              <input id="numbers" type="checkbox" checked>
+              Numbers 0–9
+            </label>
+            <label>
+              <input id="symbols" type="checkbox" checked>
+              Symbols !@#…
+            </label>
+          </div>
+
+          <label for="password-output">Generated password</label>
+          <input id="password-output" type="text" readonly
+                 spellcheck="false" autocomplete="off"
+                 placeholder="Your password appears here">
+
+          <div class="actions">
+            <button id="generate-password">Generate password</button>
+            <button id="copy-password" class="secondary" disabled>Copy</button>
+          </div>
+
+          <p class="hint">
+            Every selected character category will appear at least once.
+            Use a unique password for each account.
+          </p>
+          <p id="password-status" class="status" role="status"></p>
+        </section>
+
+        <section class="panel" id="notes-panel" hidden
+                 aria-labelledby="notes-title">
+          <h2 id="notes-title">Catch the idea before it disappears.</h2>
+          <p class="description">
+            Keep snippets, reminders, and project ideas. Notes automatically
+            save in this browser.
+          </p>
+
+          <label for="notes-input">Your coding notes</label>
+          <textarea id="notes-input" spellcheck="false"
+                    maxlength="100000"
+                    placeholder="// Today’s mission:
+1. Build something small.
+2. Understand how it works.
+3. Make it a little better."></textarea>
+
+          <div class="note-summary">
+            <span id="note-count">0 characters</span>
+            <span>Plain text · Maximum 100,000 characters</span>
+          </div>
+
+          <div class="actions">
+            <button id="download-notes">Download .txt</button>
+          </div>
+
+          <p class="hint">
+            Notes stay on this browser and do not sync across devices.
+            Clearing browser data removes them. Avoid storing secrets here.
+          </p>
+          <p id="notes-status" class="status" role="status"></p>
+        </section>
+      </div>
+
+      <aside aria-label="About this workspace">
+        <h3>Your workspace is ready.</h3>
+
+        <div class="terminal">
+          <div class="terminal-bar">devdock / console</div>
+          <pre><span>$</span> launch workspace
+<span>✓</span> JSON studio ready
+<span>✓</span> Password lab ready
+<span>✓</span> Notes editor ready
+
+<span>→</span> build something good.</pre>
+        </div>
+
+        <div class="side-item">
+          <strong>01 / Keep it simple</strong>
+          <p>No dependencies, installations, or API keys.</p>
+        </div>
+
+        <div class="side-item">
+          <strong>02 / Work locally</strong>
+          <p>This page processes your input without sending it to a server.</p>
+        </div>
+
+        <div class="side-item">
+          <strong>03 / Stay curious</strong>
+          <p>Small tools make great projects to learn from and customize.</p>
+        </div>
+      </aside>
+    </div>
+  </main>
+
+  <footer>DevDock · Made for the things between your bigger ideas.</footer>
+
+  <script>
+    const $ = selector => document.querySelector(selector);
+
+    // Tool navigation
+    document.querySelectorAll("[data-tool]").forEach(button => {
+      button.addEventListener("click", () => {
+        document.querySelectorAll("[data-tool]").forEach(item => {
+          const selected = item === button;
+
+          item.setAttribute("aria-pressed", String(selected));
+          $(`#${item.dataset.tool}-panel`).hidden = !selected;
+        });
+      });
+    });
+
+    // Clipboard with manual-copy fallback
+    async function copyField(field, status) {
+      if (!field.value) {
+        status.textContent = "There is nothing to copy yet.";
+        return;
+      }
+
+      try {
+        await navigator.clipboard.writeText(field.value);
+        status.textContent = "Copied to clipboard.";
+      } catch {
+        field.focus();
+        field.select();
+        status.textContent =
+          "Automatic copy is unavailable. Press Ctrl+C or Command+C to copy the selected text.";
+      }
+    }
+
+    // JSON formatter
+    function processJSON(pretty) {
+      const input = $("#json-input");
+      const status = $("#json-status");
+
+      if (!input.value.trim()) {
+        status.textContent = "Paste some JSON first.";
+        return;
+      }
+
+      try {
+        const parsed = JSON.parse(input.value);
+
+        input.value = pretty
+          ? JSON.stringify(parsed, null, 2)
+          : JSON.stringify(parsed);
+
+        status.textContent = pretty
+          ? "Valid JSON. Formatting complete."
+          : "Valid JSON. Minification complete.";
+      } catch (error) {
+        status.textContent = `Invalid JSON: ${error.message}`;
+      }
+    }
+
+    $("#format-json").addEventListener("click", () => processJSON(true));
+    $("#minify-json").addEventListener("click", () => processJSON(false));
+
+    $("#sample-json").addEventListener("click", () => {
+      $("#json-input").value = JSON.stringify({
+        project: "DevDock",
+        technologies: ["HTML", "CSS", "JavaScript"],
+        tools: 3,
+        ready: true
+      }, null, 2);
+
+      $("#json-status").textContent = "Sample loaded. Try editing it.";
+    });
+
+    $("#copy-json").addEventListener("click", () => {
+      copyField($("#json-input"), $("#json-status"));
+    });
+
+    // Uniform random integer using rejection sampling
+    function randomIndex(max) {
+      const range = 4294967296;
+      const limit = range - (range % max);
+      const buffer = new Uint32Array(1);
+      let value;
+
+      do {
+        window.crypto.getRandomValues(buffer);
+        value = buffer[0];
+      } while (value >= limit);
+
+      return value % max;
+    }
+
+    const categories = [
+      ["uppercase", "ABCDEFGHIJKLMNOPQRSTUVWXYZ"],
+      ["lowercase", "abcdefghijklmnopqrstuvwxyz"],
+      ["numbers", "0123456789"],
+      ["symbols", "!@#$%^&*()-_=+[]{}:,.?"]
+    ];
+
+    function clearPassword() {
+      $("#password-output").value = "";
+      $("#copy-password").disabled = true;
+      $("#password-status").textContent =
+        "Settings updated. Generate a new password.";
+    }
+
+    $("#password-length").addEventListener("input", event => {
+      $("#length-value").textContent = event.target.value;
+      clearPassword();
+    });
+
+    categories.forEach(([id]) => {
+      $(`#${id}`).addEventListener("change", clearPassword);
+    });
+
+    $("#generate-password").addEventListener("click", () => {
+      const status = $("#password-status");
+      const groups = categories
+        .filter(([id]) => $(`#${id}`).checked)
+        .map(([, characters]) => characters);
+
+      if (!groups.length) {
+        status.textContent = "Select at least one character category.";
+        return;
+      }
+
+      if (!window.crypto?.getRandomValues) {
+        status.textContent =
+          "Cryptographic randomness is unavailable in this browser.";
+        return;
+      }
+
+      const length = Number($("#password-length").value);
+      const pool = groups.join("");
+      let password;
+
+      // Reject candidates missing any selected category.
+      do {
+        password = Array.from(
+          { length },
+          () => pool[randomIndex(pool.length)]
+        ).join("");
+      } while (
+        !groups.every(group =>
+          [...password].some(character => group.includes(character))
+        )
+      );
+
+      $("#password-output").value = password;
+      $("#copy-password").disabled = false;
+      status.textContent = `Generated a ${length}-character password.`;
+    });
+
+    $("#copy-password").addEventListener("click", () => {
+      copyField($("#password-output"), $("#password-status"));
+    });
+
+    // Browser-local notes
+    const NOTES_KEY = "devdock-notes-v1";
+    const notes = $("#notes-input");
+
+    function updateNoteCount() {
+      $("#note-count").textContent =
+        `${notes.value.length.toLocaleString()} characters`;
+    }
+
+    try {
+      notes.value = (localStorage.getItem(NOTES_KEY) || "").slice(0, 100000);
+
+      if (notes.value) {
+        $("#notes-status").textContent = "Saved notes restored.";
+      }
+    } catch {
+      $("#notes-status").textContent =
+        "Browser storage is unavailable. Download your notes to keep a copy.";
+    }
+
+    notes.addEventListener("input", () => {
+      updateNoteCount();
+
+      try {
+        localStorage.setItem(NOTES_KEY, notes.value);
+        $("#notes-status").textContent = "Saved in this browser.";
+      } catch {
+        $("#notes-status").textContent =
+          "Could not save. Download your notes before closing this page.";
+      }
+    });
+
+    $("#download-notes").addEventListener("click", () => {
+      if (!notes.value.trim()) {
+        $("#notes-status").textContent = "Write a note before downloading.";
+        return;
+      }
+
+      const blob = new Blob([notes.value], {
+        type: "text/plain;charset=utf-8"
+      });
+
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+
+      link.href = url;
+      link.download = "devdock-notes.txt";
+      document.body.append(link);
+      link.click();
+      link.remove();
+
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      $("#notes-status").textContent = "Notes download requested.";
+    });
+
+    updateNoteCount();
+  </script>
+</body>
+</html>
